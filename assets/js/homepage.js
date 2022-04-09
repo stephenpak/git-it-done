@@ -1,59 +1,10 @@
-// var getUserRepos = function () {
-//   console.log('function was called');
-// };
-
-// var getUserRepos = function () {
-//   fetch('https://api.github.com/users/octocat/repos');
-// };
-
-// var getUserRepos = function () {
-//   var response = fetch('https://api.github.com/users/octocat/repos');
-//   console.log(response);
-// };
-
-//deming asynchronous communication showing that second console log is processed first
-// var getUserRepos = function () {
-//   fetch('https://api.github.com/users/octocat/repos').then(function (response) {
-//     //console.log('inside', response);
-//     console.log(response);
-//   });
-// };
-
-// getUserRepos();
-
-//to make the above response more legible with json syntax
-// var getUserRepos = function () {
-//   fetch('https://api.github.com/users/octocat/repos').then(function (response) {
-//     response.json().then(function (data) {
-//       console.log(data);
-//     });
-//   });
-// };
-
-// getUserRepos();
-
-//upto now, API requests were tested to make sure it works before incorporating to function
-//now we can re write the function that everything was verified
-// var getUserRepos = function (user) {
-//   // format the github api url
-//   var apiUrl = 'https://api.github.com/users/' + user + '/repos';
-
-//   // make a request to the url
-//   fetch(apiUrl).then(function (response) {
-//     response.json().then(function (data) {
-//       console.log(data); //lists all the repositories
-//     });
-//   });
-// };
-
-// getUserRepos();
-
+var userFormEl = document.querySelector('#user-form');
+var nameInputEl = document.querySelector('#username');
 var repoContainerEl = document.querySelector('#repos-container');
 var repoSearchTerm = document.querySelector('#repo-search-term');
-var userFormEl = document.querySelector('#user-form'); //create pre defined variable to be used as document selector
-var nameInputEl = document.querySelector('#username'); //create pre defined variable to be used as document selector
-//predefined function when form is submitted
-var formSubmitHandler = function (event) {
+
+var formSubmitHandler = function(event) {
+  // prevent page from refreshing
   event.preventDefault();
 
   // get value from input element
@@ -61,47 +12,45 @@ var formSubmitHandler = function (event) {
 
   if (username) {
     getUserRepos(username);
+
+    // clear old content
+    repoContainerEl.textContent = '';
     nameInputEl.value = '';
   } else {
     alert('Please enter a GitHub username');
   }
-
-  //console.log(event);
 };
 
-var getUserRepos = function (user) {
+var getUserRepos = function(user) {
   // format the github api url
   var apiUrl = 'https://api.github.com/users/' + user + '/repos';
 
-  // make a request to the url
+  // make a get request to url
   fetch(apiUrl)
-    .then(function (response) {
+    .then(function(response) {
       // request was successful
       if (response.ok) {
-        response.json().then(function (data) {
+        console.log(response);
+        response.json().then(function(data) {
+          console.log(data);
           displayRepos(data, user);
         });
       } else {
-        alert('Error: GitHub User Not Found');
+        alert('Error: ' + response.statusText);
       }
     })
-    .catch(function (error) {
-      // Notice this `.catch()` getting chained onto the end of the `.then()` method
+    .catch(function(error) {
       alert('Unable to connect to GitHub');
     });
 };
 
-var displayRepos = function (repos, searchTerm) {
+var displayRepos = function(repos, searchTerm) {
   // check if api returned any repos
   if (repos.length === 0) {
     repoContainerEl.textContent = 'No repositories found.';
     return;
   }
-  console.log(repos);
-  console.log(searchTerm);
 
-  // clear old content
-  repoContainerEl.textContent = '';
   repoSearchTerm.textContent = searchTerm;
 
   // loop over repos
@@ -127,12 +76,9 @@ var displayRepos = function (repos, searchTerm) {
     // check if current repo has issues or not
     if (repos[i].open_issues_count > 0) {
       statusEl.innerHTML =
-        "<i class='fas fa-times status-icon icon-danger'></i>" +
-        repos[i].open_issues_count +
-        ' issue(s)';
+        "<i class='fas fa-times status-icon icon-danger'></i>" + repos[i].open_issues_count + ' issue(s)';
     } else {
-      statusEl.innerHTML =
-        "<i class='fas fa-check-square status-icon icon-success'></i>";
+      statusEl.innerHTML = "<i class='fas fa-check-square status-icon icon-success'></i>";
     }
 
     // append to container
@@ -143,4 +89,5 @@ var displayRepos = function (repos, searchTerm) {
   }
 };
 
+// add event listeners to forms
 userFormEl.addEventListener('submit', formSubmitHandler);
